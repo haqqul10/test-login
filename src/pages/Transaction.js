@@ -6,6 +6,8 @@ import HeroProfile from "../components/HeroProfile";
 
 const Transaction = () => {
   const [transaksi, setTransaksi] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [items, setItems] = useState([]);
   // get data banner
   useEffect(() => {
     const fetchTransaksi = async () => {
@@ -24,6 +26,22 @@ const Transaction = () => {
     fetchTransaksi();
   }, []);
 
+  const handleShowMore = async () => {
+    let newOffset = offset + 5;
+    const itemUser = JSON.parse(localStorage.getItem("user"));
+    const token = itemUser.data.token;
+    if (token) {
+      const response = await axios.get(`${hostName}/transaction/history`, {
+        headers: {
+          Authorization: "Bearer " + token, //the token is a variable which holds the token
+        },
+      });
+      const data = await response.data;
+      setTransaksi(data);
+    }
+    transaksi.push(...newOffset);
+  };
+
   if (!transaksi.data) {
     return (
       <div>
@@ -32,7 +50,7 @@ const Transaction = () => {
     );
   }
 
-  // console.log(transaksi.data.records.length === 0);
+  console.log(transaksi.data.offset);
 
   return (
     <div>
@@ -77,7 +95,10 @@ const Transaction = () => {
             </div>
           )}
           {transaksi.data.records.length > 0 && (
-            <p className="font-medium text-center mt-4 text-red-600 cursor-pointer pb-8 lg:pb-0">
+            <p
+              onClick={handleShowMore}
+              className="font-medium text-center mt-4 text-red-600 cursor-pointer pb-8 lg:pb-0"
+            >
               show more
             </p>
           )}

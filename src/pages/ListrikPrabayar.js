@@ -5,10 +5,14 @@ import Listrik from "../assets/Listrik.png";
 import { FaRegMoneyBillAlt } from "react-icons/fa";
 import { hostName } from "../config";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const ListrikPrabayar = () => {
   const [services, setServices] = useState([]);
+  const [topup, setTopup] = useState([]);
+  const [error, setError] = useState("");
+
+  const navigate = useNavigate();
   // get data services
   useEffect(() => {
     const fetchServices = async () => {
@@ -22,6 +26,16 @@ const ListrikPrabayar = () => {
         });
         const data = await response.data;
         setServices(data);
+
+        let url = window.location.pathname;
+        let cutUrl = url.substring(1);
+        // console.log(cutUrl, data.data);
+
+        const filter = data.data.find((item) => {
+          return item.service_code === cutUrl;
+        });
+
+        setTopup(filter.service_tariff);
       }
     };
     fetchServices();
@@ -36,19 +50,40 @@ const ListrikPrabayar = () => {
       </div>
     );
   }
-
-  let url = window.location.pathname;
-  let cutUrl = url.substring(1);
-  // console.log(cutUrl);
-
-  const filter = services.data.find((item) => {
-    return item.service_code === cutUrl;
-  });
   // console.log(filter.service_tariff);
 
-  const handleTopup = (e) => {
+  const handleTopup = async (e) => {
     e.preventDefault();
+    const itemUser = JSON.parse(localStorage.getItem("user"));
+    const token = itemUser.data.token;
+    if (token) {
+      try {
+        const response = await axios.post(
+          `${hostName}/transaction`,
+          { service_code: "PULSA" },
+          {
+            headers: {
+              Authorization: "Bearer " + token, //the token is a variable which holds the token
+            },
+          }
+        );
+        const data = await response.data;
+        setServices(data);
+        navigate("/transaction");
+      } catch (error) {
+        console.log(error.message);
+        setError(error.message);
+        // setError("");
+      }
+    }
   };
+
+  const handleChangeTopup = (event) => {
+    const inputTopup = event.target.value;
+    setTopup(inputTopup);
+  };
+
+  // console.log(services);
 
   return (
     <div>
@@ -71,7 +106,8 @@ const ListrikPrabayar = () => {
                 name="topup"
                 className="w-full border border-gray-300 rounded-sm py-3 px-9 text-xs"
                 placeholder="masukkan nominal Top Up"
-                value={filter.service_tariff}
+                value={topup}
+                onChange={handleChangeTopup}
               />
             </label>
             <button
