@@ -2,7 +2,7 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     fontFamily: {
-      primary: "Poppins",
+      primary: "Inter",
     },
     container: {
       padding: {
@@ -18,7 +18,7 @@ module.exports = {
     },
     extend: {
       colors: {
-        primary: "#222222",
+        primary: "#3E334E",
         secondary: "#F5E6E0",
       },
       backgroundImage: {
